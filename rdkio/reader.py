@@ -1,7 +1,9 @@
 import struct
 import numpy as np
+import os
 
 event_size = 8 * 2048 * 2 + 8 + 3 * 4 + 8
+header_size = 5000
 
 
 class RawData(object):
@@ -47,6 +49,10 @@ class FileReader(object):
     :var file: file containing RDK data
 
     :var header: string containing header information from the RDK file
+
+    :var footer: string containing footer information from the RDK file
+
+    :var size: number of events in file
     """
     format = '=8cidii16384h'
 
@@ -61,6 +67,8 @@ class FileReader(object):
         self.filename = filename
         self.file = None
         self.header = None
+        self.footer = None
+        self.size = None
         if filename is not None:
             self.open()
 
@@ -77,7 +85,13 @@ class FileReader(object):
         if filename is not None:
             self.filename = filename
         self.file = open(self.filename)
-        self.header = self.file.read(5000).rstrip('\x00')
+        self.header = self.file.read(header_size).rstrip('\x00')
+        size = os.stat(self.filename).st_size
+        self.size = (size - header_size) / event_size
+        foot_size = size - event_size * self.size
+        self.seek(self.size)
+        self.footer = self.file.read(foot_size).rstrip('\x00')
+        self.seek(0)
 
     def seek(self, index):
         """
@@ -87,7 +101,15 @@ class FileReader(object):
 
         :return: None
         """
-        self.file.seek(5000 + int(index) * event_size)
+        self.file.seek(header_size + int(index) * event_size)
+
+    def tell(self):
+        """
+        Return the number of the event at the files current position
+
+        :return: current position (int)
+        """
+        return (self.file.tell() - header_size) / event_size
 
     def read(self):
         """
