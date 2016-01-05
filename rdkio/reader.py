@@ -141,21 +141,20 @@ class FileReader(object):
         self.board = int(temp[3])
         if self.local:
             self.file = open(self.filename)
+            size = os.stat(self.filename).st_size
         else:
-            temp = re.search(self.s3_format, self.filename).groups()
+            bucket, key = re.search(self.s3_format, self.filename).groups()
             if self.s3 is None:
                 self.s3 = boto3.resource('s3')
-            self.file = self.s3.Object(temp[0], temp[1]).get()['Body']
+            self.obj = self.s3.Object(bucket, key)
+            temp = self.obj.get()
+            size = temp['ContentLength']
+            self.file = temp['Body']
+        self.size = (size - header_size) / event_size
+        foot_size = size - event_size * self.size
+        self.seek(self.size)
+        self.footer = self.file.read(foot_size).rstrip('\x00')
         self.header = self.file.read(header_size).rstrip('\x00')
-        if self.local:
-            size = os.stat(self.filename).st_size
-            self.size = (size - header_size) / event_size
-            foot_size = size - event_size * self.size
-            self.seek(self.size)
-            self.footer = self.file.read(foot_size).rstrip('\x00')
-        else:
-            self.size = -1
-            self.footer = None
         self.seek(0)
 
     def seek(self, index):
@@ -166,8 +165,11 @@ class FileReader(object):
 
         :return: None
         """
+        loc = header_size + int(index) * event_size
         if self.local:
-            self.file.seek(header_size + int(index) * event_size)
+            self.file.seek(loc)
+        else:
+            self.file = self.obj.get(Range='bytes=%i-' % loc)
 
     def tell(self):
         """
