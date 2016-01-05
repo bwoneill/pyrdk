@@ -21,7 +21,7 @@ def sim((i, j)):
     reader.seek(j)
     d2 = reader.read()
     d2.signal = scale(d2.signal, axis=1)
-    return i, j, euclidean(d1.signal[8], d2.signal[8])
+    return i, j, euclidean(d1.signal[7], d2.signal[7])
 
 
 sc = pyspark.SparkContext()
