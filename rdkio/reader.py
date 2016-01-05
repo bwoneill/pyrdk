@@ -2,6 +2,7 @@ import struct
 import numpy as np
 import os
 import re
+import boto3
 
 event_size = 8 * 2048 * 2 + 8 + 3 * 4 + 8
 header_size = 5000
@@ -29,7 +30,7 @@ class RawData(object):
 
     :var hp_flag: I don't know why this is here, but it should always be 0xFF
 
-    :var channel: numpy array (shape 8 x 2048) of signal traces
+    :var signal: numpy array (shape 8 x 2048) of signal traces
     """
 
     def __init__(self, t, series, run, board, data):
@@ -58,12 +59,12 @@ class RawData(object):
             self.timestamp = data[9]
             self.n_channels = data[10]
             self.hp_flag = data[11]
-            self.channel = np.array(data[12:]).reshape((8, 2048))
+            self.signal = np.array(data[12:]).reshape((8, 2048)).astype(float)
 
     def __repr__(self):
         result = '\'%s\', %i, %i, %i, %i, %f, %s' % (
             self.type, self.series, self.run, self.board, self.index, self.timestamp,
-            '\'{' + ','.join(['{' + ','.join(row.astype(str)) + '}' for row in self.channel]) + '}\'')
+            '\'{' + ','.join(['{' + ','.join(row.astype(str)) + '}' for row in self.signal]) + '}\'')
         return result
 
 
@@ -91,15 +92,19 @@ class FileReader(object):
     """
     data_format = '=8cidii16384h'
     filename_format = r'([SCD])(\d+)r(\d+)b(\d+)'
+    s3_format = r'([^/]+)/(.*)'
 
-    def __init__(self, filename=None):
+    def __init__(self, filename=None, local=True):
         """
         Initialize reader
 
         :param filename: name of the RDK file
 
+        :param local: true if using a file on a local file system, false to use AWS S3
+
         :return: self
         """
+        self.s3 = None
         self.filename = filename
         self.file = None
         self.header = None
@@ -109,14 +114,17 @@ class FileReader(object):
         self.series = None
         self.run = None
         self.board = None
+        self.local = local
         if filename is not None:
             self.open()
 
-    def open(self, filename=None):
+    def open(self, filename=None, local=None):
         """
         Open a new file
 
         :param filename: name of the RDK file
+
+        :param local: true if using a file on a local file structure
 
         :return: None
         """
@@ -124,18 +132,30 @@ class FileReader(object):
             self.file.close()
         if filename is not None:
             self.filename = filename
+        if local is not None:
+            self.local = local
         temp = re.search(self.filename_format, self.filename).groups()
         self.type = temp[0]
         self.series = int(temp[1])
         self.run = int(temp[2])
         self.board = int(temp[3])
-        self.file = open(self.filename)
+        if self.local:
+            self.file = open(self.filename)
+        else:
+            temp = re.search(self.s3_format, self.filename).groups()
+            if self.s3 is None:
+                self.s3 = boto3.resource('s3')
+            self.file = self.s3.Object(temp[0], temp[1]).get()['Body']
         self.header = self.file.read(header_size).rstrip('\x00')
-        size = os.stat(self.filename).st_size
-        self.size = (size - header_size) / event_size
-        foot_size = size - event_size * self.size
-        self.seek(self.size)
-        self.footer = self.file.read(foot_size).rstrip('\x00')
+        if self.local:
+            size = os.stat(self.filename).st_size
+            self.size = (size - header_size) / event_size
+            foot_size = size - event_size * self.size
+            self.seek(self.size)
+            self.footer = self.file.read(foot_size).rstrip('\x00')
+        else:
+            self.size = -1
+            self.footer = None
         self.seek(0)
 
     def seek(self, index):
@@ -146,7 +166,8 @@ class FileReader(object):
 
         :return: None
         """
-        self.file.seek(header_size + int(index) * event_size)
+        if self.local:
+            self.file.seek(header_size + int(index) * event_size)
 
     def tell(self):
         """
@@ -154,7 +175,10 @@ class FileReader(object):
 
         :return: current position (int)
         """
-        return (self.file.tell() - header_size) / event_size
+        if self.local:
+            return (self.file.tell() - header_size) / event_size
+        else:
+            return -1
 
     def read(self):
         """
@@ -163,5 +187,8 @@ class FileReader(object):
         :return: RawData object containing the data read from the file
         """
         data = self.file.read(event_size)
-        data = struct.unpack(self.data_format, data)
-        return RawData(self.type, self.series, self.run, self.board, data)
+        if len(data) == event_size:
+            data = struct.unpack(self.data_format, data)
+            return RawData(self.type, self.series, self.run, self.board, data)
+        else:
+            return None
