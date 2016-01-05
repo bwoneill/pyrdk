@@ -3,6 +3,7 @@ import pyspark
 from pyspark.mllib.clustering import PowerIterationClustering
 from itertools import combinations
 from scipy.spatial.distance import *
+from sklearn.preprocessing import scale
 from os import environ
 
 # chekout dbscan
@@ -15,13 +16,15 @@ combos = combinations(range(500), 2)
 def sim(i, j):
     reader.seek(i)
     d1 = reader.read()
+    d1.signal = scale(d1.signal, axis=1)
     reader.seek(j)
     d2 = reader.read()
+    d2.signal = scale(d2.signal, axis=1)
     return i, j, euclidean(d1.signal[0], d2.signal[0])
 
 
 sc = pyspark.SparkContext()
 sc._conf.set('spark.executor.memory', '64g').set('spark.driver.memory', '64g').set('spark.driver.maxResultsSize', '0')
 rdd = sc.parallelize(combos)
-rdd = rdd.map(sim)
-pic = PowerIterationClustering().train(rdd, 5)
+sim_rdd = rdd.map(sim)
+pic = PowerIterationClustering().train(sim_rdd, 5)
