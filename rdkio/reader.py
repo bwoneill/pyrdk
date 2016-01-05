@@ -166,7 +166,7 @@ class FileReader(object):
         :return: None
         """
         loc = header_size + int(index) * event_size
-        if self.source:
+        if self.source == 'local':
             self.file.seek(loc)
         else:
             obj = s3.Object(self.bucket, self.key)
@@ -178,7 +178,7 @@ class FileReader(object):
 
         :return: current position (int)
         """
-        if self.source:
+        if self.source == 'local':
             return (self.file.tell() - header_size) / event_size
         else:
             return -1
