@@ -18,8 +18,8 @@ def sim(i, j):
     return i, j, euclidean(d1.signal[0], d2.signal[0])
 
 
-# sc = pyspark.SparkContext()
-# sc._conf.set('spark.executor.memory', '64g').set('spark.driver.memory', '64g').set('spark.driver.maxResultsSize', '0')
-# rdd = sc.parallelize(combos)
-# rdd = rdd.map(sim)
-# pic = PowerIterationClustering().train(rdd, 5)
+sc = pyspark.SparkContext()
+sc._conf.set('spark.executor.memory', '64g').set('spark.driver.memory', '64g').set('spark.driver.maxResultsSize', '0')
+rdd = sc.parallelize(combos)
+rdd = rdd.map(sim)
+pic = PowerIterationClustering().train(rdd, 5)
