@@ -101,7 +101,7 @@ class FileReader(object):
 
         :param filename: name of the RDK file
 
-        :param source: true if using a file on a source file system, false to use AWS S3
+        :param source: 'local' or 's3'
 
         :return: self
         """
@@ -120,13 +120,13 @@ class FileReader(object):
         if filename is not None:
             self.open()
 
-    def open(self, filename=None, local=None):
+    def open(self, filename=None, source=None):
         """
         Open a new file
 
         :param filename: name of the RDK file
 
-        :param local: true if using a file on a source file structure
+        :param source: 'local' or 's3'
 
         :return: None
         """
@@ -134,14 +134,14 @@ class FileReader(object):
             self.file.close()
         if filename is not None:
             self.filename = filename
-        if local is not None:
-            self.source = local
+        if source is not None:
+            self.source = source
         temp = re.search(self.filename_format, self.filename).groups()
         self.type = temp[0]
         self.series = int(temp[1])
         self.run = int(temp[2])
         self.board = int(temp[3])
-        if self.source == 'local':
+        if self.source == 'source':
             self.file = open(self.filename)
             size = os.stat(self.filename).st_size
         elif self.source == 's3':

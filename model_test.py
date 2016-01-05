@@ -10,7 +10,7 @@ from collections import Counter
 # chekout dbscan
 
 # reader = FileReader('%s/ss223/S223r10b1.dat' % environ.get('RDKDATA'))
-reader = FileReader('rdkbwoneill/ss223/S223r10b1.dat', False)
+reader = FileReader('rdkbwoneill/ss223/S223r10b1.dat', 's3')
 combos = combinations(range(1000), 2)
 
 
