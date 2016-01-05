@@ -5,12 +5,13 @@ from itertools import combinations
 from scipy.spatial.distance import *
 from sklearn.preprocessing import scale
 from os import environ
+from collections import Counter
 
 # chekout dbscan
 
-reader = FileReader('%s/ss223/S223r10b1.dat' % environ.get('RDKDATA'))
-# reader = FileReader('rdkbwoneill/ss223/S223r10b1.dat', False)
-combos = combinations(range(500), 2)
+# reader = FileReader('%s/ss223/S223r10b1.dat' % environ.get('RDKDATA'))
+reader = FileReader('rdkbwoneill/ss223/S223r10b1.dat', False)
+combos = combinations(range(5000), 2)
 
 
 def sim((i, j)):
@@ -28,3 +29,6 @@ sc._conf.set('spark.executor.memory', '64g').set('spark.driver.memory', '64g').s
 rdd = sc.parallelize(combos)
 sim_rdd = rdd.map(sim)
 pic = PowerIterationClustering().train(sim_rdd, 5)
+labels = pic.assignments().collect()
+count = Counter([a.cluster for a in labels])
+print count
