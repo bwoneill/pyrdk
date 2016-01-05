@@ -169,7 +169,7 @@ class FileReader(object):
         if self.local:
             self.file.seek(loc)
         else:
-            self.file = self.obj.get(Range='bytes=%i-' % loc)
+            self.file = self.obj.get(Range='bytes=%i-' % loc)['Body']
 
     def tell(self):
         """
