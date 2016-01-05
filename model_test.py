@@ -13,7 +13,7 @@ reader = FileReader('%s/ss223/S223r10b1.dat' % environ.get('RDKDATA'))
 combos = combinations(range(500), 2)
 
 
-def sim(i, j):
+def sim((i, j)):
     reader.seek(i)
     d1 = reader.read()
     d1.signal = scale(d1.signal, axis=1)
@@ -27,4 +27,4 @@ sc = pyspark.SparkContext()
 sc._conf.set('spark.executor.memory', '64g').set('spark.driver.memory', '64g').set('spark.driver.maxResultsSize', '0')
 rdd = sc.parallelize(combos)
 sim_rdd = rdd.map(sim)
-# pic = PowerIterationClustering().train(sim_rdd, 5)
+pic = PowerIterationClustering().train(sim_rdd, 5)
