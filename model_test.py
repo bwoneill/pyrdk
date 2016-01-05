@@ -18,6 +18,7 @@ def sim(i, j):
 
 
 sc = pyspark.SparkContext()
+sc._conf.set('spark.executor.memory', '64g').set('spark.driver.memory', '64g').set('spark.driver.maxResultsSize', '0')
 rdd = sc.parallelize(combos)
 rdd = rdd.map(sim)
 pic = PowerIterationClustering().train(rdd, 5)
