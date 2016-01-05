@@ -5,8 +5,10 @@ from itertools import combinations
 from scipy.spatial.distance import *
 from os import environ
 
-# reader = FileReader('%s/ss223/S223r10b1.dat' % environ.get('RDKDATA'))
-reader = FileReader('rdkbwoneill/ss223/S223r10b1.dat', False)
+# chekout dbscan
+
+reader = FileReader('%s/ss223/S223r10b1.dat' % environ.get('RDKDATA'))
+# reader = FileReader('rdkbwoneill/ss223/S223r10b1.dat', False)
 combos = combinations(range(500), 2)
 
 
