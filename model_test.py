@@ -11,7 +11,7 @@ from collections import Counter
 
 # reader = FileReader('%s/ss223/S223r10b1.dat' % environ.get('RDKDATA'))
 reader = FileReader('rdkbwoneill/ss223/S223r10b1.dat', False)
-combos = combinations(range(5000), 2)
+combos = combinations(range(1000), 2)
 
 
 def sim((i, j)):
