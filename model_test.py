@@ -8,6 +8,7 @@ from os import environ
 from collections import Counter
 from math import exp
 import numpy as np
+import time
 
 # chekout dbscan
 
@@ -69,7 +70,8 @@ if __name__ == '__main__':
     sc = pyspark.SparkContext()
     sc._conf.set('spark.executor.memory', '64g').set('spark.driver.memory', '64g').set('spark.driver.maxResultsSize',
                                                                                        '0')
-    chunks = list(make_chunks(0, 5120, 256))
+    chunks = list(make_chunks(0, 3072, 256))
+    start = time.time()
     rdd = sc.parallelize(chunks)
     sim_rdd = rdd.flatMap(chunk_similarity)
     # rdd = sc.parallelize(combos)
@@ -80,6 +82,7 @@ if __name__ == '__main__':
     labels = pic.assignments().collect()
     count = Counter([a.cluster for a in labels])
     print count
+    print time.time() - start
     with open('results.txt') as f:
         for a in labels:
             f.write('%i,%i\n' % (a.id, a.cluster))
