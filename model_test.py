@@ -67,7 +67,8 @@ def sim((i, j)):
 
 
 if __name__ == '__main__':
-    tuning_param = np.linspace(2.355, 2.356, 11)
+    # tuning_param = np.linspace(2.355, 2.356, 11)
+    tuning_param = [1]
     counts = []
     sc = pyspark.SparkContext()
     chunks = list(make_chunks(0, 3072, 256))
@@ -79,12 +80,12 @@ if __name__ == '__main__':
         # sim_rdd = rdd.map(sim)
         # sim_rdd.cache()
         # test = sim_rdd.collect()
-        pic = PowerIterationClustering().train(sim_rdd, 2)
+        pic = PowerIterationClustering().train(sim_rdd, 3)
         labels = pic.assignments().collect()
         count = Counter([a.cluster for a in labels])
-        minority = count.most_common(2)[1][1]
-        counts.append(minority)
-    # print count
+        # minority = count.most_common(2)[1][1]
+        # counts.append(minority)
+    print count
     print time.time() - start
     print counts
     # with open('results.txt', 'w') as f:
