@@ -44,6 +44,8 @@ def chunk_similarity(((i1, l1), (i2, l2))):
         d2 = batchRead(bucket, key, i2, l2)
         combos = [(i, j) for i in xrange(l1) for j in xrange(l2)]
     for i, j in combos:
+        if d1[i].start_flat != '********':
+            print i1 + i
         similarity = exp(-euclidean(d1[i].signal[7], d2[j].signal[7]) ** 2)
         result.append((i1 + i, i1 + j, similarity))
     return result
@@ -63,7 +65,7 @@ if __name__ == '__main__':
     sc = pyspark.SparkContext()
     sc._conf.set('spark.executor.memory', '64g').set('spark.driver.memory', '64g').set('spark.driver.maxResultsSize',
                                                                                        '0')
-    chunks = make_chunks(0, 1024, 32)
+    chunks = list(make_chunks(0, 1024, 32))
     rdd = sc.parallelize(chunks)
     sim_rdd = rdd.flatMap(chunk_similarity)
     # rdd = sc.parallelize(combos)
