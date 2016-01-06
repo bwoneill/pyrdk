@@ -5,7 +5,7 @@ import numpy as np
 from copy import copy
 from multiprocessing import Pool
 
-f = FileReader('/mnt/shared/ss223/S223r4b1.dat')
+f = FileReader('/mnt/shared/ss223/S223r10b1.dat')
 
 n = 0
 m1 = np.zeros((8, 2048))

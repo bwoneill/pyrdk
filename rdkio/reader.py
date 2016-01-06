@@ -95,7 +95,7 @@ class FileReader(object):
     filename_format = r'([SCD])(\d+)r(\d+)b(\d+)'
     s3_format = r'([^/]+)/(.*)'
 
-    def __init__(self, filename=None, source='source'):
+    def __init__(self, filename=None, source='local'):
         """
         Initialize reader
 
@@ -141,7 +141,7 @@ class FileReader(object):
         self.series = int(temp[1])
         self.run = int(temp[2])
         self.board = int(temp[3])
-        if self.source == 'source':
+        if self.source == 'local':
             self.file = open(self.filename)
             size = os.stat(self.filename).st_size
         elif self.source == 's3':
