@@ -6,6 +6,7 @@ from scipy.spatial.distance import *
 from sklearn.preprocessing import scale
 from os import environ
 from collections import Counter
+from math import exp
 
 # chekout dbscan
 
@@ -21,7 +22,7 @@ def sim((i, j)):
     reader.seek(j)
     d2 = reader.read()
     d2.signal = scale(d2.signal, axis=1)
-    return i, j, euclidean(d1.signal[7], d2.signal[7])
+    return i, j, exp(-euclidean(d1.signal[7], d2.signal[7]) ** 2)
 
 
 sc = pyspark.SparkContext()
@@ -30,7 +31,7 @@ rdd = sc.parallelize(combos)
 sim_rdd = rdd.map(sim)
 # sim_rdd.cache()
 # test = sim_rdd.collect()
-pic = PowerIterationClustering().train(sim_rdd, 5)
+pic = PowerIterationClustering().train(sim_rdd, 2)
 labels = pic.assignments().collect()
 count = Counter([a.cluster for a in labels])
 print count
