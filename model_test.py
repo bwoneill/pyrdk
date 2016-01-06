@@ -68,9 +68,9 @@ if __name__ == '__main__':
     sim_rdd = rdd.flatMap(chunk_similarity)
     # rdd = sc.parallelize(combos)
     # sim_rdd = rdd.map(sim)
-    # sim_rdd.cache()
-    # test = sim_rdd.collect()
-    pic = PowerIterationClustering().train(sim_rdd, 2)
-    labels = pic.assignments().collect()
-    count = Counter([a.cluster for a in labels])
-    print count
+    sim_rdd.cache()
+    test = sim_rdd.collect()
+    # pic = PowerIterationClustering().train(sim_rdd, 2)
+    # labels = pic.assignments().collect()
+    # count = Counter([a.cluster for a in labels])
+    # print count
