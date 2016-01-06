@@ -69,7 +69,7 @@ if __name__ == '__main__':
     sc = pyspark.SparkContext()
     sc._conf.set('spark.executor.memory', '64g').set('spark.driver.memory', '64g').set('spark.driver.maxResultsSize',
                                                                                        '0')
-    chunks = list(make_chunks(0, 1024, 32))
+    chunks = list(make_chunks(0, 5120, 256))
     rdd = sc.parallelize(chunks)
     sim_rdd = rdd.flatMap(chunk_similarity)
     # rdd = sc.parallelize(combos)
@@ -80,3 +80,6 @@ if __name__ == '__main__':
     labels = pic.assignments().collect()
     count = Counter([a.cluster for a in labels])
     print count
+    with open('results.txt') as f:
+        for a in labels:
+            f.write('%i,%i\n' % (a.id, a.cluster))
