@@ -9,6 +9,7 @@ header_size = 5000
 
 s3 = boto3.resource('s3')
 
+
 class RawData(object):
     """
     Data structure to store the RDK data
@@ -152,9 +153,9 @@ class FileReader(object):
             self.file = temp['Body']
         self.size = (size - header_size) / event_size
         foot_size = size - event_size * self.size
+        self.header = self.file.read(header_size).rstrip('\x00')
         self.seek(self.size)
         self.footer = self.file.read(foot_size).rstrip('\x00')
-        self.header = self.file.read(header_size).rstrip('\x00')
         self.seek(0)
 
     def seek(self, index):
@@ -195,3 +196,21 @@ class FileReader(object):
             return RawData(self.type, self.series, self.run, self.board, data)
         else:
             return None
+
+
+def batchRead(bucket, key, index, n):
+    obj = s3.Object(bucket, key)
+    begin = 5000 + int(index) * event_size
+    end = begin + n * event_size - 1
+    f = obj.get(Range='bytes=%i-%i' % (begin, end))['Body']
+    data = f.read()
+    result = []
+    t, series, run, board = re.search(FileReader.filename_format, key).groups()
+    series = int(series)
+    run = int(run)
+    board = int(board)
+    for i in xrange(n):
+        event = data[i * event_size: (i + 1) * event_size]
+        event = struct.unpack(FileReader.data_format, event)
+        result.append(RawData(t, series, run, board, event))
+    return result
