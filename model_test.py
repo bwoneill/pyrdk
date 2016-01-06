@@ -37,16 +37,20 @@ def chunk_similarity(((i1, l1), (i2, l2))):
     result = []
     if i1 == i2:
         d1 = batchRead(bucket, key, i1, l1)
+        for d in d1:
+            d.signal = scale(d.signal, axis=1)
         d2 = d1
         combos = combinations(range(l1), 2)
     else:
         d1 = batchRead(bucket, key, i1, l1)
+        for d in d1:
+            d.signal = scale(d.signal, axis=1)
         d2 = batchRead(bucket, key, i2, l2)
+        for d in d2:
+            d.signal = scale(d.signal, axis=1)
         combos = [(i, j) for i in xrange(l1) for j in xrange(l2)]
     for i, j in combos:
-        if d1[i].start_flag != '********':
-            print i1 + i
-        similarity = exp(-euclidean(d1[i].signal[7], d2[j].signal[7]) ** 2)
+        similarity = exp(-cosine(d1[i].signal[7], d2[j].signal[7]) ** 2)
         result.append((i1 + i, i1 + j, similarity))
     return result
 
@@ -70,9 +74,9 @@ if __name__ == '__main__':
     sim_rdd = rdd.flatMap(chunk_similarity)
     # rdd = sc.parallelize(combos)
     # sim_rdd = rdd.map(sim)
-    sim_rdd.cache()
-    test = sim_rdd.collect()
-    # pic = PowerIterationClustering().train(sim_rdd, 2)
-    # labels = pic.assignments().collect()
-    # count = Counter([a.cluster for a in labels])
-    # print count
+    # sim_rdd.cache()
+    # test = sim_rdd.collect()
+    pic = PowerIterationClustering().train(sim_rdd, 2)
+    labels = pic.assignments().collect()
+    count = Counter([a.cluster for a in labels])
+    print count
