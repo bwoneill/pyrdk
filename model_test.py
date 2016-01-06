@@ -83,6 +83,6 @@ if __name__ == '__main__':
     count = Counter([a.cluster for a in labels])
     print count
     print time.time() - start
-    with open('results.txt') as f:
+    with open('results.txt', 'w') as f:
         for a in labels:
             f.write('%i,%i\n' % (a.id, a.cluster))
