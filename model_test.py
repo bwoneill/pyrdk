@@ -71,7 +71,7 @@ if __name__ == '__main__':
     tuning_param = [1]
     counts = []
     sc = pyspark.SparkContext()
-    chunks = list(make_chunks(0, 3072, 256))
+    chunks = list(make_chunks(0, 8192, 512))
     start = time.time()
     for var in tuning_param:
         rdd = sc.parallelize(chunks)
