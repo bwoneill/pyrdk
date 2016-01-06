@@ -44,7 +44,7 @@ def chunk_similarity(((i1, l1), (i2, l2))):
         d2 = batchRead(bucket, key, i2, l2)
         combos = [(i, j) for i in xrange(l1) for j in xrange(l2)]
     for i, j in combos:
-        if d1[i].start_flat != '********':
+        if d1[i].start_flag != '********':
             print i1 + i
         similarity = exp(-euclidean(d1[i].signal[7], d2[j].signal[7]) ** 2)
         result.append((i1 + i, i1 + j, similarity))
