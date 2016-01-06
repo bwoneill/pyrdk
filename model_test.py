@@ -34,7 +34,7 @@ def make_chunks(start, stop, chunk_size):
     return combinations_with_replacement(result, 2)
 
 
-def chunk_similarity(((i1, l1), (i2, l2))):
+def chunk_similarity(((i1, l1), (i2, l2)), var):
     result = []
     if i1 == i2:
         d1 = batchRead(bucket, key, i1, l1)
@@ -51,7 +51,7 @@ def chunk_similarity(((i1, l1), (i2, l2))):
             d.signal = scale(d.signal, axis=1)
         combos = [(i, j) for i in xrange(l1) for j in xrange(l2)]
     for i, j in combos:
-        similarity = exp(-euclidean(d1[i].signal[7], d2[j].signal[7]) ** 2 / 2.35) # sweet spot between 2.35 and 2.36
+        similarity = exp(-euclidean(d1[i].signal[7], d2[j].signal[7]) ** 2 / var)  # sweet spot between 2.35 and 2.36
         result.append((i1 + i, i1 + j, similarity))
     return result
 
@@ -67,22 +67,25 @@ def sim((i, j)):
 
 
 if __name__ == '__main__':
+    tuning_param = np.linspace(2.35, 2.36, 11)
+    counts = []
     sc = pyspark.SparkContext()
-    sc._conf.set('spark.executor.memory', '64g').set('spark.driver.memory', '64g').set('spark.driver.maxResultsSize',
-                                                                                       '0')
     chunks = list(make_chunks(0, 3072, 256))
     start = time.time()
-    rdd = sc.parallelize(chunks)
-    sim_rdd = rdd.flatMap(chunk_similarity)
-    # rdd = sc.parallelize(combos)
-    # sim_rdd = rdd.map(sim)
-    # sim_rdd.cache()
-    # test = sim_rdd.collect()
-    pic = PowerIterationClustering().train(sim_rdd, 2)
-    labels = pic.assignments().collect()
-    count = Counter([a.cluster for a in labels])
-    print count
+    for var in tuning_param:
+        rdd = sc.parallelize(chunks)
+        sim_rdd = rdd.flatMap(lambda x: chunk_similarity(x, var))
+        # rdd = sc.parallelize(combos)
+        # sim_rdd = rdd.map(sim)
+        # sim_rdd.cache()
+        # test = sim_rdd.collect()
+        pic = PowerIterationClustering().train(sim_rdd, 2)
+        labels = pic.assignments().collect()
+        count = Counter([a.cluster for a in labels])
+        counts.append(count[1])
+    # print count
     print time.time() - start
-    with open('results.txt', 'w') as f:
-        for a in labels:
-            f.write('%i,%i\n' % (a.id, a.cluster))
+    print counts
+    # with open('results.txt', 'w') as f:
+    #     for a in labels:
+    #         f.write('%i,%i\n' % (a.id, a.cluster))
