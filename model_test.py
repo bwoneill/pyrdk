@@ -80,14 +80,14 @@ if __name__ == '__main__':
         # sim_rdd = rdd.map(sim)
         # sim_rdd.cache()
         # test = sim_rdd.collect()
-        pic = PowerIterationClustering().train(sim_rdd, 3)
+        pic = PowerIterationClustering().train(sim_rdd, 5)
         labels = pic.assignments().collect()
         count = Counter([a.cluster for a in labels])
         # minority = count.most_common(2)[1][1]
         # counts.append(minority)
     print count
     print time.time() - start
-    print counts
+    # print counts
     # with open('results.txt', 'w') as f:
     #     for a in labels:
     #         f.write('%i,%i\n' % (a.id, a.cluster))
