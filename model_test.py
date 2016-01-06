@@ -82,7 +82,7 @@ if __name__ == '__main__':
         pic = PowerIterationClustering().train(sim_rdd, 2)
         labels = pic.assignments().collect()
         count = Counter([a.cluster for a in labels])
-        minority = count.most_common(2)[1][2]
+        minority = count.most_common(2)[1][1]
         counts.append(minority)
     # print count
     print time.time() - start
