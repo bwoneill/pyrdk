@@ -1,7 +1,7 @@
 from rdk.rdkio import *
 from rdk.metrics import *
 import pyspark
-from pyspark.mllib.clustering import PowerIterationClustering
+from pyspark.mllib.clustering import PowerIterationClustering, KMeans
 from itertools import combinations, combinations_with_replacement
 from scipy.spatial.distance import *
 from sklearn.preprocessing import scale
@@ -19,9 +19,7 @@ bucket = 'rdkbwoneill'
 key = 'ss223/S223r10b1.dat'
 
 
-# combos = combinations(range(1000), 2)
-
-def make_chunks(start, stop, chunk_size):
+def chunks(start, stop, chunk_size):
     result = []
     done = False
     index = start
@@ -32,7 +30,11 @@ def make_chunks(start, stop, chunk_size):
         else:
             result.append((index, min(chunk_size, stop - index)))
         index += chunk_size
-    return combinations_with_replacement(result, 2)
+    return result
+
+
+def chunk_combinations(start, stop, chunk_size):
+    return combinations_with_replacement(chunks(start, stop, chunk_size), 2)
 
 
 def chunk_similarity(((i1, l1), (i2, l2))):
@@ -61,6 +63,14 @@ def chunk_similarity(((i1, l1), (i2, l2))):
     return result
 
 
+def chunk_fits((i, l)):
+    result = []
+    data = batchRead(bucket, key, i, l)
+    for d in data:
+        result.append(fit_ep(d.signal[7]))
+    return result
+
+
 def sim((i, j)):
     reader.seek(i)
     d1 = reader.read()
@@ -74,22 +84,18 @@ def sim((i, j)):
 if __name__ == '__main__':
     counts = []
     sc = pyspark.SparkContext()
-    chunks = list(make_chunks(0, 8192, 512))
+    cchunks = list(chunk_combinations(0, 8192, 512))
     start = time.time()
-    rdd = sc.parallelize(chunks)
-    sim_rdd = rdd.flatMap(lambda x: chunk_similarity(x))
-    # rdd = sc.parallelize(combos)
-    # sim_rdd = rdd.map(sim)
-    # sim_rdd.cache()
-    # test = sim_rdd.collect()
-    pic = PowerIterationClustering().train(sim_rdd, 5)
-    labels = pic.assignments().collect()
-    count = Counter([a.cluster for a in labels])
-    # minority = count.most_common(2)[1][1]
-    # counts.append(minority)
-    print count
+    fit_rdd = sc.parallelize(chunks(0, 8182, 512)).flatMap(chunk_fits)
+    km = KMeans().train(fit_rdd, 5)
+    print km.clusterCenters
+    # rdd = sc.parallelize(cchunks)
+    # sim_rdd = rdd.flatMap(lambda x: chunk_similarity(x))
+    # pic = PowerIterationClustering().train(sim_rdd, 5)
+    # labels = pic.assignments().collect()
+    # count = Counter([a.cluster for a in labels])
+    # print count
     print time.time() - start
-    # print counts
-    with open('results.txt', 'w') as f:
-        for a in labels:
-            f.write('%i,%i\n' % (a.id, a.cluster))
+    # with open('results.txt', 'w') as f:
+    #     for a in labels:
+    #         f.write('%i,%i\n' % (a.id, a.cluster))
