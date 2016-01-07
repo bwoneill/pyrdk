@@ -59,9 +59,8 @@ def chunk_similarity(((i1, l1), (i2, l2))):
         try:
             similarity = exp(-euclidean(d1[i].ep_fit, d2[i].ep_fit) ** 2)
             result.append((i1 + i, i1 + j, similarity))
-        except RuntimeError:
-            print i, j
-            raise
+        except:
+            raise RuntimeError('%i, %j' % (i, j))
     return result
 
 
