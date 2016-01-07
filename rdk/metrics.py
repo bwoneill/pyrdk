@@ -18,6 +18,10 @@ def ss_distance(v1, v2, s, shift_up, shift_right, dist=euclidean):
     return dist(np.roll(v1, int(shift_right)) * s + shift_up, v2 / s - shift_up)
 
 
+def ep_scale(v):
+    return scale(v)
+
+
 def ep_scale_shift(v):
     peak = np.argmax(v)
     v_temp = np.roll(v, 1023 - peak)  # move peak to center of signal
@@ -26,7 +30,7 @@ def ep_scale_shift(v):
 
 
 def ep_dist(v1, v2):
-    return euclidean(ep_scale_shift(v1), ep_scale_shift(v2))
+    return euclidean(ep_scale(v1), ep_scale(v2))
 
 
 if __name__ == '__main__':
