@@ -1,6 +1,6 @@
 import pandas as pd
-from rdkio.reader import *
-from rdkio.sql import *
+from rdk.rdkio import *
+from rdk.sql import *
 import numpy as np
 import psycopg2 as psql
 

@@ -1,6 +1,6 @@
 from sklearn.preprocessing import scale
 import matplotlib.pyplot as plt
-from rdkio.reader import *
+from rdk.rdkio import *
 import numpy as np
 from copy import copy
 from multiprocessing import Pool

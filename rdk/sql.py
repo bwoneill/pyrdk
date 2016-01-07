@@ -1,5 +1,5 @@
 import psycopg2 as psql
-from reader import *
+from rdkio import *
 
 create_tbl = '''CREATE TABLE data (
     type char,

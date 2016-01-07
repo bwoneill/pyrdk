@@ -1,4 +1,4 @@
-from rdkio.reader import *
+from rdk.rdkio import *
 from sklearn.preprocessing import scale
 import pyspark as ps
 import boto3
