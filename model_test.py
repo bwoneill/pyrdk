@@ -94,7 +94,7 @@ if __name__ == '__main__':
     predictions = km.predict(values)
     with open('predictions.txt', 'w') as f:
         for value, pred in izip(values.collect(), predictions.collect()):
-            f.write('%i,%i' % (value[0], pred))
+            f.write('%i,%i\n' % (value[0], pred))
             pass
     print km.clusterCenters
     # rdd = sc.parallelize(cchunks)
