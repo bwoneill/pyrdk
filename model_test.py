@@ -94,8 +94,9 @@ if __name__ == '__main__':
     predictions = km.predict(values)
     with open('predictions.txt', 'w') as f:
         f.write('index,p0,p1,p2,p3,category')
-        for (key, (a, b, c, d)), pred in izip(fit_rdd.collect(), predictions.collect()):
-            f.write('\n%i,%i,%i,%i,%i,%i' % (key, a, b, c, d, pred))
+        for temp, pred in izip(fit_rdd.collect(), predictions.collect()):
+            key, value = temp
+            f.write('\n%i,%f,%f,%f,%f,%i' % (key, value[0], value[1], value[2], value[3], pred))
             pass
     print km.clusterCenters
     # rdd = sc.parallelize(cchunks)
