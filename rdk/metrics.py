@@ -43,7 +43,7 @@ std_x = np.arange(2048)
 def fit_ep(v):
     params = [0, np.max(v), np.argmax(v), 5]
     params, _ = curve_fit(e_func, std_x, v, params)
-    res = np.sum((v - e_func(std_x, params)) ** 2)
+    res = np.sum((v - e_func(std_x, *params)) ** 2)
     params.append(res)
     return params
 
