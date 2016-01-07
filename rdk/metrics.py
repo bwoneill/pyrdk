@@ -33,8 +33,8 @@ def ep_dist(v1, v2):
     return euclidean(ep_scale(v1), ep_scale(v2))
 
 
-def e_func(x, param):
-    return param[0] + param[1] * np.exp(-(x - param[2]) ** 2 / param[3])
+def e_func(x, a, b, c, d):
+    return a + b * np.exp(-(x - c) ** 2 / d)
 
 
 std_x = np.arange(2048)
