@@ -42,12 +42,16 @@ std_x = np.arange(2048)
 
 def fit_ep(v):
     params = [0, np.max(v), np.argmax(v), 100]
-    try:
-        params = curve_fit(e_func, std_x, v, params)[0].tolist()
-    except RuntimeError as e:
-        params = [0, 0, 0, 1]
-    res = np.sum((v - e_func(std_x, *params)) ** 2)
-    params.append(res)
+    result = minimize(lambda p, v: np.sum((v - e_func(std_x, *p)) ** 2), params, (v,), method='L-BFGS-B',
+                      bounds=((None, None), (0, None), (None, None), (1e-4, None)))
+    params = result.x.tolist()
+    params.append(np.sum((v - e_func(std_x, *params)) ** 2))
+    # try:
+    #     params = curve_fit(e_func, std_x, v, params)[0].tolist()
+    # except RuntimeError as e:
+    #     params = [0, 0, 0, 1]
+    # res = np.sum((v - e_func(std_x, *params)) ** 2)
+    # params.append(res)
     return params
 
 
