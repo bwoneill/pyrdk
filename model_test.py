@@ -95,7 +95,7 @@ if __name__ == '__main__':
     fit_rdd = fit_rdd.mapValues(lambda x: (x - means) / scales)
     values = fit_rdd.values()
     values.cache()
-    km = KMeans().train(values, 5)
+    km = KMeans().train(values, 3)
     predictions = km.predict(values)
     with open('predictions.txt', 'w') as f:
         f.write('index,p0,p1,p2,p3,res,category')
