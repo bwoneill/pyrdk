@@ -35,7 +35,7 @@ def make_chunks(start, stop, chunk_size):
     return combinations_with_replacement(result, 2)
 
 
-def chunk_similarity(((i1, l1), (i2, l2)), var=1, dist=euclidean):
+def chunk_similarity(((i1, l1), (i2, l2)), var=1):
     result = []
     if i1 == i2:
         d1 = batchRead(bucket, key, i1, l1)
@@ -52,7 +52,7 @@ def chunk_similarity(((i1, l1), (i2, l2)), var=1, dist=euclidean):
             d.signal = scale(d.signal, axis=1)
         combos = [(i, j) for i in xrange(l1) for j in xrange(l2)]
     for i, j in combos:
-        similarity = exp(-dist(d1[i].signal[7], d2[j].signal[7]) ** 2 / var)  # sweet spot between 2.35 and 2.36
+        similarity = exp(-euclidean(d1[i].signal[7], d2[j].signal[7]) ** 2 / var)  # sweet spot between 2.35 and 2.36
         result.append((i1 + i, i1 + j, similarity))
     return result
 
@@ -76,7 +76,7 @@ if __name__ == '__main__':
     start = time.time()
     for var in tuning_param:
         rdd = sc.parallelize(chunks)
-        sim_rdd = rdd.flatMap(lambda x: chunk_similarity(x, dist=ep_dist))
+        sim_rdd = rdd.flatMap(lambda x: chunk_similarity(x))
         # rdd = sc.parallelize(combos)
         # sim_rdd = rdd.map(sim)
         # sim_rdd.cache()
