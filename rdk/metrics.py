@@ -41,10 +41,11 @@ std_x = np.arange(2048)
 
 
 def fit_ep(v):
-    params = [0, np.max(v), np.argmax(v), 20]
-    params, _ = curve_fit(e_func, std_x, v, params)
+    params = [0, np.max(v), np.argmax(v), 100]
+    params = curve_fit(e_func, std_x, v, params)[0].tolist()
     res = np.sum((v - e_func(std_x, *params)) ** 2)
-    return list(params).append(res)
+    params.append(res)
+    return params
 
 
 if __name__ == '__main__':
@@ -53,4 +54,5 @@ if __name__ == '__main__':
     for _ in xrange(20):
         d2 = reader.read()
         # print optimized_distance(d1.signal[7], d2.signal[7], euclidean)
-        print euclidean(ep_scale_shift(d1.signal[7]), ep_scale_shift(d2.signal[7]))
+        # print euclidean(ep_scale_shift(d1.signal[7]), ep_scale_shift(d2.signal[7]))
+        print fit_ep(d2.signal[7])
