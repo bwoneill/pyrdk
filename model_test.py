@@ -67,7 +67,7 @@ def chunk_fits((i, l)):
     result = []
     data = batchRead(bucket, key, i, l)
     for j, d in enumerate(data):
-        result.append((j, fit_ep(d.signal[7])))
+        result.append((i + j, fit_ep(d.signal[7])))
     return result
 
 
