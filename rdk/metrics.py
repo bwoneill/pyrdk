@@ -21,7 +21,7 @@ def ss_distance(v1, v2, s, shift_up, shift_right, dist=euclidean):
 def ep_scale_shift(v):
     peak = np.argmax(v)
     v_temp = np.roll(v, 1023 - peak)  # move peak to center of signal
-    return scale(v_temp[959, 1215])  # use only the 64 points before and 192 points after peak
+    return scale(v_temp[959: 1215])  # use only the 64 points before and 192 points after peak
     # (256 points or 1/8th of total signal)
 
 
