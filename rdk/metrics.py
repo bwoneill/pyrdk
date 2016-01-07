@@ -45,7 +45,7 @@ def fit_ep(v):
     try:
         params = curve_fit(e_func, std_x, v, params)[0].tolist()
     except RuntimeError as e:
-        raise RuntimeWarning(e.message)
+        params = [0, 0, 0, 1]
     res = np.sum((v - e_func(std_x, *params)) ** 2)
     params.append(res)
     return params

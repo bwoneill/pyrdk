@@ -56,11 +56,8 @@ def chunk_similarity(((i1, l1), (i2, l2))):
         combos = [(i, j) for i in xrange(l1) for j in xrange(l2)]
     for i, j in combos:
         # similarity = exp(-euclidean(d1[i].signal[7], d2[j].signal[7]) ** 2)  # sweet spot between 2.35 and 2.36
-        try:
-            similarity = exp(-euclidean(d1[i].ep_fit, d2[i].ep_fit) ** 2)
-            result.append((i1 + i, i1 + j, similarity))
-        except RuntimeWarning as e:
-            raise RuntimeWarning('%i, %j' % (i, j) + e.message)
+        similarity = exp(-euclidean(d1[i].ep_fit, d2[i].ep_fit) ** 2)
+        result.append((i1 + i, i1 + j, similarity))
     return result
 
 
