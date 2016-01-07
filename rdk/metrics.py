@@ -33,6 +33,21 @@ def ep_dist(v1, v2):
     return euclidean(ep_scale(v1), ep_scale(v2))
 
 
+def e_func(x, param):
+    return param[0] + param[1] * np.exp(-(x - param[2]) ** 2 / param[3])
+
+
+std_x = np.arange(2048)
+
+
+def fit_ep(v):
+    params = [0, np.max(v), np.argmax(v), 5]
+    params, _ = curve_fit(e_func, std_x, v, params)
+    res = np.sum((v - e_func(std_x, params)) ** 2)
+    params.append(res)
+    return params
+
+
 if __name__ == '__main__':
     reader = FileReader('/mnt/shared/ss223/S223r10b1.dat')
     d1 = reader.read()
