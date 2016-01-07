@@ -2,6 +2,7 @@ from rdk.rdkio import *
 from rdk.metrics import *
 import pyspark
 from pyspark.mllib.clustering import PowerIterationClustering, KMeans
+from pyspark.mllib.stat import Statistics
 from itertools import combinations, combinations_with_replacement, izip
 from scipy.spatial.distance import *
 from sklearn.preprocessing import scale
@@ -88,6 +89,8 @@ if __name__ == '__main__':
     start = time.time()
     fit_rdd = sc.parallelize(chunks(0, 8182, 512)).flatMap(chunk_fits).sortByKey()
     fit_rdd.cache()
+    stats = Statistics.colStats(fit_rdd.values())
+    fit_rdd = fit_rdd.mapValues(lambda x: (x - stats.mean()) / np.sqrt(stats.variance()))
     values = fit_rdd.values()
     values.cache()
     km = KMeans().train(values, 5)
