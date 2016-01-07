@@ -2,7 +2,7 @@ from rdk.rdkio import *
 from rdk.metrics import *
 import pyspark
 from pyspark.mllib.clustering import PowerIterationClustering, KMeans
-from itertools import combinations, combinations_with_replacement
+from itertools import combinations, combinations_with_replacement, izip
 from scipy.spatial.distance import *
 from sklearn.preprocessing import scale
 from os import environ
@@ -66,8 +66,8 @@ def chunk_similarity(((i1, l1), (i2, l2))):
 def chunk_fits((i, l)):
     result = []
     data = batchRead(bucket, key, i, l)
-    for d in data:
-        result.append(fit_ep(d.signal[7]))
+    for j, d in enumerate(data):
+        result.append((j, fit_ep(d.signal[7])))
     return result
 
 
@@ -86,8 +86,16 @@ if __name__ == '__main__':
     sc = pyspark.SparkContext()
     cchunks = list(chunk_combinations(0, 8192, 512))
     start = time.time()
-    fit_rdd = sc.parallelize(chunks(0, 8182, 512)).flatMap(chunk_fits)
-    km = KMeans().train(fit_rdd, 5)
+    fit_rdd = sc.parallelize(chunks(0, 8182, 512)).flatMap(chunk_fits).sortByKey()
+    fit_rdd.cache()
+    values = fit_rdd.values()
+    values.cache()
+    km = KMeans().train(values, 5)
+    predictions = km.predict(values)
+    with open('predictions.txt', 'w') as f:
+        for value, pred in izip(values, predictions):
+            f.write('%i,%i' % (value[0], pred))
+            pass
     print km.clusterCenters
     # rdd = sc.parallelize(cchunks)
     # sim_rdd = rdd.flatMap(lambda x: chunk_similarity(x))
