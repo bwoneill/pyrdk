@@ -9,7 +9,7 @@ object DBSCANSample {
 //    val sc = new SparkContext(conf)
 
     val data = sc.textFile("fit_rdd.txt")
-    val parsedData = data.map(s => Vectors.dense(s.split(',').map(_.toDouble))).cache()
+    val parsedData = data.map(s => Vectors.dense(s.split(',').map(_.replaceAll("[\\(\\[\\]\\)]","")).map(_.toDouble))).cache()
     val model = DBSCAN.fit(
       data = parsedData,
       eps = 0.01,
