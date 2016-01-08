@@ -88,22 +88,23 @@ if __name__ == '__main__':
     cchunks = list(chunk_combinations(0, 8192, 512))
     start = time.time()
     fit_rdd = sc.parallelize(chunks(0, 8182, 512)).flatMap(chunk_fits).sortByKey()
-    fit_rdd.cache()
-    stats = Statistics.colStats(fit_rdd.values())
-    means = stats.mean()
-    scales = np.sqrt(stats.variance())
-    fit_rdd = fit_rdd.mapValues(lambda x: (x - means) / scales)
-    values = fit_rdd.values()
-    values.cache()
-    km = KMeans().train(values, 3)
-    predictions = km.predict(values)
-    with open('predictions.txt', 'w') as f:
-        f.write('index,p0,p1,p2,p3,res,category')
-        for temp, pred in izip(fit_rdd.collect(), predictions.collect()):
-            key, value = temp
-            f.write('\n%i,%f,%f,%f,%f,%f,%i' % (key, value[0], value[1], value[2], value[3], value[4], pred))
-            pass
-    print km.clusterCenters
+    fit_rdd.saveAsTextFile('fit_rdd.txt')
+    # fit_rdd.cache()
+    # stats = Statistics.colStats(fit_rdd.values())
+    # means = stats.mean()
+    # scales = np.sqrt(stats.variance())
+    # fit_rdd = fit_rdd.mapValues(lambda x: (x - means) / scales)
+    # values = fit_rdd.values()
+    # values.cache()
+    # km = KMeans().train(values, 3)
+    # predictions = km.predict(values)
+    # with open('predictions.txt', 'w') as f:
+    #     f.write('index,p0,p1,p2,p3,res,category')
+    #     for temp, pred in izip(fit_rdd.collect(), predictions.collect()):
+    #         key, value = temp
+    #         f.write('\n%i,%f,%f,%f,%f,%f,%i' % (key, value[0], value[1], value[2], value[3], value[4], pred))
+    #         pass
+    # print km.clusterCenters
     # rdd = sc.parallelize(cchunks)
     # sim_rdd = rdd.flatMap(lambda x: chunk_similarity(x))
     # pic = PowerIterationClustering().train(sim_rdd, 5)
