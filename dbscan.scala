@@ -1,4 +1,5 @@
 import org.apache.spark.mllib.clustering.dbscan.DBSCAN
+import org.apache.spark.mllib.linalg.Vectors
 import com.amazonaws.services.s3._
 
 object DBSCANSample {
