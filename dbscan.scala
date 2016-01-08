@@ -12,7 +12,7 @@ object DBSCANSample {
     val data = sc.textFile("fit_rdd.txt")
     val parsedData = data.map(s => Vectors.dense(s.split(',').map(_.replaceAll("[\\(\\[\\]\\)]","")).map(_.toDouble))).cache()
     val model = DBSCAN.fit(
-      eps = 0.01,
+      eps = 0.01f,
       minPoints = 5,
       data = parsedData)
 
