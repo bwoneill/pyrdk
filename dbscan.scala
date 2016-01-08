@@ -12,10 +12,9 @@ object DBSCANSample {
     val data = sc.textFile("fit_rdd.txt")
     val parsedData = data.map(s => Vectors.dense(s.split(',').map(_.replaceAll("[\\(\\[\\]\\)]","")).map(_.toDouble))).cache()
     val model = DBSCAN.fit(
-      data = parsedData,
       eps = 0.01,
       minPoints = 5,
-      maxPointsPerPartition = 512)
+      data = parsedData)
 
     model.labeledPoints.map(p =>  s"${p.x},${p.y},${p.cluster}").saveAsTextFile("dbscan.txt")
 
