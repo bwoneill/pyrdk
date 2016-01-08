@@ -10,7 +10,7 @@ object DBSCANSample {
 
     val data = sc.textFile("fit_rdd.txt")
 
-    val model = DBSCAN.train(
+    val model = DBSCAN.fit(
       data,
       eps = 0.01,
       minPoints = 5,
