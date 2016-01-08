@@ -16,7 +16,7 @@ object DBSCANSample {
       minPoints = 5,
       data = parsedData)
 
-    model.labeledPoints.map(p =>  s"${p.x},${p.y},${p.cluster}").saveAsTextFile("dbscan.txt")
+    model.saveAsTextFile("dbscan.txt")
 
 //    sc.stop()
   }
