@@ -8,7 +8,7 @@ object DBSCANSample {
     val conf = new SparkConf().setAppName("RDK DBSCAN")
     val sc = new SparkContext(conf)
 
-    val data = sc.textFile('fit_rdd.txt')
+    val data = sc.textFile("fit_rdd.txt")
 
     val model = DBSCAN.train(
       data,
