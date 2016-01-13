@@ -3,6 +3,10 @@ import sys
 
 
 class BoundingBox(object):
+    """
+    :lower: lower bounds of bounding box
+    :upper: upper bounds of bounding box
+    """
     def __init__(self, lower=None, upper=None, k=None):
         """
         :type lower: numpy.ndarray
@@ -10,8 +14,7 @@ class BoundingBox(object):
         :type upper: numpy.ndarray
         :param upper:
         :type k: int
-        :param k:
-        :return:
+        :param k: number of dimension
         """
         if lower is not None:
             self.lower = np.array(lower)
