@@ -74,8 +74,8 @@ class KDPartitioner(object):
                 current_label = todo_q.get()
                 current_partition = self.partitions[current_label]
                 current_box = self.bounding_boxes[current_label]
-                # part1, part2, median = split_partition(current_partition, current_axis, next_label)
-                (part1, part2, median), current_axis = smart_split(current_partition, k, next_label)
+                part1, part2, median = split_partition(current_partition, current_axis, next_label)
+                # (part1, part2, median), current_axis = smart_split(current_partition, k, next_label)
                 box1, box2 = current_box.split(current_axis, median)
                 self.partitions[current_label] = part1
                 self.partitions[next_label] = part2
@@ -105,11 +105,11 @@ if __name__ == '__main__':
     import matplotlib.cm as cm
     from time import time
 
-    centers = [[100, 100], [-100, -100], [100, -100]]
-    X, labels_true = make_blobs(n_samples=7500000, centers=centers, cluster_std=40,
+    centers = [[1, 1], [-1, -1], [1, -1]]
+    X, labels_true = make_blobs(n_samples=750, centers=centers, cluster_std=0.4,
                                 random_state=0)
 
-    # X = StandardScaler().fit_transform(X)
+    X = StandardScaler().fit_transform(X)
 
     sc = ps.SparkContext()
     test_data = sc.parallelize(enumerate(X))
